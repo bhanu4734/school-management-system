@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #0056b3;
+        }
+
+        nav a {
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #004080;
+            border-radius: 4px;
+        }
+
+        main {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        main h2 {
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .category-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .category-box {
+            width: 250px;
+            height: 250px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            line-height: 250px;
+            border-radius: 12px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s ease;
+        }
+
+        .category-box:hover {
+            transform: scale(1.05);
+            background-color: #004080;
+        }
+
+        footer {
+            background-color: #0056b3;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 3rem;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Form and Button Styling */
+        form {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        form input, form select {
+            padding: 0.7rem;
+            margin: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: 200px;
+        }
+
+        form button {
+            padding: 0.7rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .category-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>School Management System</h1>
+</header>
+
+<nav>
+    <a href="#" onclick="loadHomePage()">Home</a>
+    <a href="#" onclick="viewStudents()">Students</a>
+    <a href="#" onclick="viewTeachers()">Teachers</a>
+    <a href="#" onclick="viewClasses()">Classes</a>
+</nav>
+
+<main id="main-content">
+    <h2>Welcome to the School Management System</h2>
+    <p>Select a category to manage Students, Teachers, or Classes.</p>
+
+    <!-- Hoverable boxes for navigating sections -->
+    <div class="category-container">
+        <div class="category-box" onclick="viewStudents()">Students</div>
+        <div class="category-box" onclick="viewTeachers()">Teachers</div>
+        <div class="category-box" onclick="viewClasses()">Classes</div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2024 School Management System. All rights reserved.</p>
+</footer>
+
+<script>
+    // Home Page - Displays the main menu
+    function loadHomePage() {
+        document.getElementById('main-content').innerHTML = `
+            <h2>Welcome to the School Management System</h2>
+            <p>Select a category to manage Students, Teachers, or Classes.</p>
+            <div class="category-container">
+                <div class="category-box" onclick="viewStudents()">Students</div>
+                <div class="category-box" onclick="viewTeachers()">Teachers</div>
+                <div class="category-box" onclick="viewClasses()">Classes</div>
+            </div>
+        `;
+    }
+
+    // Function to load the CRUD interface for Students
+    function viewStudents() {
+        document.getElementById('main-content').innerHTML = `
+            <h2>Manage Students</h2>
+            <button class="btn" onclick="showAddStudentForm()">Add Student</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="students-table">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+            <div id="student-form"></div>
+        `;
+        fetchStudents();
+    }
+
+    // Fetch all students
+    function fetchStudents() {
+        fetch('/students')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('students-table');
+                table.innerHTML = data.map(student => `
+                    <tr>
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.age}</td>
+                        <td>${student.email}</td>
+                        <td>
+                            <button class="btn" onclick="editStudent(${student.id})">Edit</button>
+                            <button class="btn" onclick="deleteStudent(${student.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    // Show form to add a student
+    function showAddStudentForm() {
+        document.getElementById('student-form').innerHTML = `
+            <h3>Add Student</h3>
+            <form onsubmit="addStudent(event)">
+                <input type="text" id="student-name" placeholder="Name" required />
+                <input type="number" id="student-age" placeholder="Age" required />
+                <input type="email" id="student-email" placeholder="Email" required />
+                <button class="btn" type="submit">Save</button>
+            </form>
+        `;
+    }
+
+    // Add a new student
+    function addStudent(event) {
+        event.preventDefault();
+        const name = document.getElementById('student-name').value;
+        const age = document.getElementById('student-age').value;
+        const email = document.getElementById('student-email').value;
+
+        fetch('/students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, age, email })
+        }).then(() => {
+            fetchStudents();
+            document.getElementById('student-form').innerHTML = '';
+        });
+    }
+
+    // Edit a student's details
+    function editStudent(id) {
+        fetch(`/students/${id}`)
+            .then(response => response.json())
+            .then(student => {
+                document.getElementById('student-form').innerHTML = `
+                    <h3>Edit Student</h3>
+                    <form onsubmit="updateStudent(event, ${id})">
+                        <input type="text" id="edit-student-name" value="${student.name}" required />
+                        <input type="number" id="edit-student-age" value="${student.age}" required />
+                        <input type="email" id="edit-student-email" value="${student.email}" required />
+                        <button class="btn" type="submit">Update</button>
+                    </form>
+                `;
+            });
+    }
+
+    // Update a student's details
+    function updateStudent(event, id) {
+        event.preventDefault();
+        const name = document.getElementById('edit-student-name').value;
+        const age = document.getElementById('edit-student-age').value;
+        const email = document.getElementById('edit-student-email').value;
+
+        fetch(`/students/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, age, email })
+        }).then(() => {
+            fetchStudents();
+            document.getElementById('student-form').innerHTML = '';
+        });
+    }
+
+    // Delete a student
+    function deleteStudent(id) {
+        fetch(`/students/${id}`, {
+            method: 'DELETE'
+        }).then(() => {
+            fetchStudents();
+        });
+    }
+
+    // Similar CRUD operations for Teachers
+    function viewTeachers() {
+        document.getElementById('main-content').innerHTML = `
+            <h2>Manage Teachers</h2>
+            <button class="btn" onclick="showAddTeacherForm()">Add Teacher</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teachers-table">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+            <div id="teacher-form"></div>
+        `;
+        fetchTeachers();
+    }
+
+    function fetchTeachers() {
+        fetch('/teachers')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('teachers-table');
+                table.innerHTML = data.map(teacher => `
+                    <tr>
+                        <td>${teacher.id}</td>
+                        <td>${teacher.name}</td>
+                        <td>${teacher.age}</td>
+                        <td>${teacher.email}</td>
+                        <td>
+                            <button class="btn" onclick="editTeacher(${teacher.id})">Edit</button>
+                            <button class="btn" onclick="deleteTeacher(${teacher.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    function showAddTeacherForm() {
+        document.getElementById('teacher-form').innerHTML = `
+            <h3>Add Teacher</h3>
+            <form onsubmit="addTeacher(event)">
+                <input type="text" id="teacher-name" placeholder="Name" required />
+                <input type="number" id="teacher-age" placeholder="Age" required />
+                <input type="email" id="teacher-email" placeholder="Email" required />
+                <button class="btn" type="submit">Save</button>
+            </form>
+        `;
+    }
+
+    function addTeacher(event) {
+        event.preventDefault();
+        const name = document.getElementById('teacher-name').value;
+        const age = document.getElementById('teacher-age').value;
+        const email = document.getElementById('teacher-email').value;
+
+        fetch('/teachers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, age, email })
+        }).then(() => {
+            fetchTeachers();
+            document.getElementById('teacher-form').innerHTML = '';
+        });
+    }
+
+    function editTeacher(id) {
+        fetch(`/teachers/${id}`)
+            .then(response => response.json())
+            .then(teacher => {
+                document.getElementById('teacher-form').innerHTML = `
+                    <h3>Edit Teacher</h3>
+                    <form onsubmit="updateTeacher(event, ${id})">
+                        <input type="text" id="edit-teacher-name" value="${teacher.name}" required />
+                        <input type="number" id="edit-teacher-age" value="${teacher.age}" required />
+                        <input type="email" id="edit-teacher-email" value="${teacher.email}" required />
+                        <button class="btn" type="submit">Update</button>
+                    </form>
+                `;
+            });
+    }
+
+    function updateTeacher(event, id) {
+        event.preventDefault();
+        const name = document.getElementById('edit-teacher-name').value;
+        const age = document.getElementById('edit-teacher-age').value;
+        const email = document.getElementById('edit-teacher-email').value;
+
+        fetch(`/teachers/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, age, email })
+        }).then(() => {
+            fetchTeachers();
+            document.getElementById('teacher-form').innerHTML = '';
+        });
+    }
+
+    function deleteTeacher(id) {
+        fetch(`/teachers/${id}`, {
+            method: 'DELETE'
+        }).then(() => {
+            fetchTeachers();
+        });
+    }
+
+    // Similar CRUD operations for Classes
+    function viewClasses() {
+        document.getElementById('main-content').innerHTML = `
+            <h2>Manage Classes</h2>
+            <button class="btn" onclick="showAddClassForm()">Add Class</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Teacher</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="classes-table">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+            <div id="class-form"></div>
+        `;
+        fetchClasses();
+    }
+
+    function fetchClasses() {
+        fetch('/classes')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('classes-table');
+                table.innerHTML = data.map(classObj => `
+                    <tr>
+                        <td>${classObj.id}</td>
+                        <td>${classObj.name}</td>
+                        <td>${classObj.teacher}</td>
+                        <td>
+                            <button class="btn" onclick="editClass(${classObj.id})">Edit</button>
+                            <button class="btn" onclick="deleteClass(${classObj.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    function showAddClassForm() {
+        document.getElementById('class-form').innerHTML = `
+            <h3>Add Class</h3>
+            <form onsubmit="addClass(event)">
+                <input type="text" id="class-name" placeholder="Class Name" required />
+                <input type="text" id="class-teacher" placeholder="Teacher Name" required />
+                <button class="btn" type="submit">Save</button>
+            </form>
+        `;
+    }
+
+    function addClass(event) {
+        event.preventDefault();
+        const name = document.getElementById('class-name').value;
+        const teacher = document.getElementById('class-teacher').value;
+
+        fetch('/classes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, teacher })
+        }).then(() => {
+            fetchClasses();
+            document.getElementById('class-form').innerHTML = '';
+        });
+    }
+
+    function editClass(id) {
+        fetch(`/classes/${id}`)
+            .then(response => response.json())
+            .then(classObj => {
+                document.getElementById('class-form').innerHTML = `
+                    <h3>Edit Class</h3>
+                    <form onsubmit="updateClass(event, ${id})">
+                        <input type="text" id="edit-class-name" value="${classObj.name}" required />
+                        <input type="text" id="edit-class-teacher" value="${classObj.teacher}" required />
+                        <button class="btn" type="submit">Update</button>
+                    </form>
+                `;
+            });
+    }
+
+    function updateClass(event, id) {
+        event.preventDefault();
+        const name = document.getElementById('edit-class-name').value;
+        const teacher = document.getElementById('edit-class-teacher').value;
+
+        fetch(`/classes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, teacher })
+        }).then(() => {
+            fetchClasses();
+            document.getElementById('class-form').innerHTML = '';
+        });
+    }
+
+    function deleteClass(id) {
+        fetch(`/classes/${id}`, {
+            method: 'DELETE'
+        }).then(() => {
+            fetchClasses();
+        });
+    }
+</script>
+
+</body>
+</html>
